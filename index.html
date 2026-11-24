@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Импульс 2027 — International Inclusive Games (Прототип)</title>
+<style>
+  :root {
+    --bg: #070b14; --surface: #0f172a; --card: #1e293b;
+    --text: #f8fafc; --muted: #94a3b8;
+    --primary: #0ea5e9; --accent: #f59e0b; --green: #10b981;
+    --border: rgba(148, 163, 184, 0.2);
+    --base-size: 16px;
+  }
+  body.hc {
+    --bg: #000000; --surface: #000000; --card: #111111;
+    --text: #ffffff; --muted: #e5e5e5; --primary: #ffff00; --accent: #00ffff;
+    --border: #ffffff;
+    --base-size: 20px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg); color: var(--text);
+    font-size: var(--base-size); line-height: 1.55;
+  }
+  .container { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+
+  header {
+    background: rgba(15, 23, 42, 0.92); border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 20; backdrop-filter: blur(12px);
+  }
+  .nav { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; padding: 14px 0; }
+  .logo { font-weight: 800; font-size: 1.2em; letter-spacing: -0.3px; }
+  .logo span { color: var(--primary); }
+  .nav-links { display: flex; gap: 18px; flex-wrap: wrap; font-size: 0.9em; font-weight: 600; color: var(--muted); }
+  .nav-links a { color: inherit; text-decoration: none; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-actions { display: flex; gap: 8px; align-items: center; }
+  .ctrl-btn {
+    padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); font-weight: 700; font-size: 0.8em; cursor: pointer;
+  }
+  .ctrl-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
+
+  .hero {
+    padding: 64px 0 48px;
+    background: radial-gradient(circle at 80% 10%, rgba(14, 165, 233, 0.2), transparent 55%);
+  }
+  .pill {
+    display: inline-block; padding: 6px 14px; border-radius: 999px;
+    background: rgba(14, 165, 233, 0.15); border: 1px solid var(--primary);
+    color: var(--primary); font-weight: 700; font-size: 0.85em; margin-bottom: 16px;
+  }
+  h1 { font-size: 2.6em; line-height: 1.12; font-weight: 800; margin-bottom: 16px; }
+  .hero-desc { font-size: 1.1em; color: var(--muted); max-width: 720px; margin-bottom: 28px; }
+
+  .countdown {
+    display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 28px;
+  }
+  .cd-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px 20px; min-width: 100px; text-align: center;
+  }
+  .cd-num { font-size: 1.8em; font-weight: 800; color: var(--primary); }
+  .cd-lbl { font-size: 0.78em; color: var(--muted); text-transform: uppercase; }
+
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn {
+    padding: 14px 24px; border-radius: 12px; font-weight: 700; font-size: 0.95em;
+    text-decoration: none; cursor: pointer; border: none;
+  }
+  .btn-primary { background: linear-gradient(90deg, #0ea5e9, #10b981); color: #fff; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 24px 0 48px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px; }
+  .stat-num { font-size: 2em; font-weight: 800; color: var(--accent); }
+  .stat-txt { color: var(--muted); font-size: 0.95em; }
+
+  .section { padding: 36px 0; border-top: 1px solid var(--border); }
+  .sec-title { font-size: 1.7em; font-weight: 800; margin-bottom: 18px; }
+  .cards-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+  .card h3 { font-size: 1.1em; margin-bottom: 8px; }
+  .card p { font-size: 0.9em; color: var(--muted); }
+  footer { padding: 32px 0; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85em; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <div class="container nav">
+    <div class="logo"><span>ИМПУЛЬС</span> 2027</div>
+    <nav class="nav-links" id="nav-links"></nav>
+    <div class="nav-actions">
+      <button class="ctrl-btn active" id="btn-ru" onclick="setLang('ru')">RU</button>
+      <button class="ctrl-btn" id="btn-en" onclick="setLang('en')">EN</button>
+      <button class="ctrl-btn" onclick="toggleA11y()" id="btn-a11y">Aa Слабовидящим</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <div class="pill" id="h-pill"></div>
+    <h1 id="h-title"></h1>
+    <p class="hero-desc" id="h-desc"></p>
+
+    <div class="countdown">
+      <div class="cd-box"><div class="cd-num" id="cd-d">--</div><div class="cd-lbl" id="l-d"></div></div>
+      <div class="cd-box"><div class="cd-num" id="cd-h">--</div><div class="cd-lbl" id="l-h"></div></div>
+      <div class="cd-box"><div class="cd-num" id="cd-m">--</div><div class="cd-lbl" id="l-m"></div></div>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#apply" id="cta-ru"></a>
+      <a class="btn btn-outline" href="#apply" id="cta-int"></a>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+  <div class="stats" id="stats-grid"></div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <h2 class="sec-title" id="sec-prog"></h2>
+    <div class="cards-3" id="prog-cards"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="container" id="foot-txt"></div>
+</footer>
+
+<script>
+const i18n = {
+  ru: {
+    nav: ["О фестивале", "Программа", "Новости", "Выставка", "История", "Партнёры", "Документы"],
+    a11y: "Aa Слабовидящим",
+    pill: "11–15 ИЮНЯ 2027 • НИЖНИЙ НОВГОРОД",
+    title: "IV Международный фестиваль адаптивных видов спорта «Импульс»",
+    desc: "Международный инклюзивный комитет объединяет спортсменов, делегации и партнёров из России и более 20 стран мира. Прототип разработан на базе ТЗ (WordPress + Polylang, /ru/ и /en/ без автоперевода).",
+    labels: ["дней", "часов", "минут"],
+    cta1: "Подать заявку (РФ и СНГ)",
+    cta2: "International Application",
+    stats: [
+      ["4 000+", "спортсменов со всего мира"],
+      ["20+", "стран-участниц"],
+      ["30+", "видов адаптивного спорта"],
+      ["2024–2027", "история и развитие фестиваля"]
+    ],
+    secProg: "Направления и категории",
+    prog: [
+      ["Категория «Профессионал»", "Официальные соревнования по 30+ дисциплинам адаптивного спорта с судейской коллегией."],
+      ["Категория «Любитель»", "Открытые старты, инклюзивные эстафеты и мастер-классы для всех желающих."],
+      ["Международная выставка", "Экспозиция спортивных технологий, реабилитации, экипировки и сервисов доступной среды."]
+    ],
+    foot: "Прототип официального сайта International Inclusive Games 2027 • Полноценные RU/EN версии + CMS + SEO (Schema.org SportsEvent)"
+  },
+  en: {
+    nav: ["About", "Program", "News", "Expo", "History", "Partners", "Documents"],
+    a11y: "Aa Accessibility",
+    pill: "JUNE 11–15, 2027 • NIZHNY NOVGOROD",
+    title: "IV International Inclusive Games «Impulse» 2027",
+    desc: "Organized by the International Inclusive Committee. Uniting athletes, delegations and partners from 20+ countries. Prototype built to match the technical specification (WordPress + Polylang, separate /ru/ & /en/ CMS content).",
+    labels: ["days", "hours", "minutes"],
+    cta1: "Apply (Russia & CIS)",
+    cta2: "International Application",
+    stats: [
+      ["4,000+", "athletes worldwide"],
+      ["20+", "participating countries"],
+      ["30+", "adaptive sports disciplines"],
+      ["2024–2027", "festival heritage & growth"]
+    ],
+    secProg: "Program & Categories",
+    prog: [
+      ["Professional Division", "Official competitions across 30+ adaptive sports with certified international referees."],
+      ["Amateur Division", "Open inclusive races, relay events and sports workshops for everyone."],
+      ["International Expo", "Exhibition of adaptive sports equipment, rehabilitation tech and accessible solutions."]
+    ],
+    foot: "Official Website Prototype · International Inclusive Games 2027 · Full RU/EN CMS + SEO (Schema.org SportsEvent)"
+  }
+};
+
+function setLang(l) {
+  const d = i18n[l];
+  document.getElementById('btn-ru').classList.toggle('active', l === 'ru');
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  document.getElementById('nav-links').innerHTML = d.nav.map(x => `<a href="#">${x}</a>`).join('');
+  document.getElementById('btn-a11y').textContent = d.a11y;
+  document.getElementById('h-pill').textContent = d.pill;
+  document.getElementById('h-title').textContent = d.title;
+  document.getElementById('h-desc').textContent = d.desc;
+  document.getElementById('l-d').textContent = d.labels[0];
+  document.getElementById('l-h').textContent = d.labels[1];
+  document.getElementById('l-m').textContent = d.labels[2];
+  document.getElementById('cta-ru').textContent = d.cta1;
+  document.getElementById('cta-int').textContent = d.cta2;
+  document.getElementById('stats-grid').innerHTML = d.stats.map(s => `<div class="stat-card"><div class="stat-num">${s[0]}</div><div class="stat-txt">${s[1]}</div></div>`).join('');
+  document.getElementById('sec-prog').textContent = d.secProg;
+  document.getElementById('prog-cards').innerHTML = d.prog.map(p => `<div class="card"><h3>${p[0]}</h3><p>${p[1]}</p></div>`).join('');
+  document.getElementById('foot-txt').textContent = d.foot;
+}
+
+function toggleA11y() {
+  document.body.classList.toggle('hc');
+}
+
+function updateTimer() {
+  const target = new Date('2027-06-11T10:00:00+03:00').getTime();
+  const diff = Math.max(0, target - Date.now());
+  document.getElementById('cd-d').textContent = Math.floor(diff / 86400000);
+  document.getElementById('cd-h').textContent = Math.floor((diff % 86400000) / 3600000);
+  document.getElementById('cd-m').textContent = Math.floor((diff % 3600000) / 60000);
+}
+
+setLang('ru');
+updateTimer();
+setInterval(updateTimer, 30000);
+</script>
+</body>
+</html>
