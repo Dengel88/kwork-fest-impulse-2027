@@ -1,224 +1,454 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Импульс 2027 — International Inclusive Games (Прототип)</title>
-<style>
-  :root {
-    --bg: #070b14; --surface: #0f172a; --card: #1e293b;
-    --text: #f8fafc; --muted: #94a3b8;
-    --primary: #0ea5e9; --accent: #f59e0b; --green: #10b981;
-    --border: rgba(148, 163, 184, 0.2);
-    --base-size: 16px;
-  }
-  body.hc {
-    --bg: #000000; --surface: #000000; --card: #111111;
-    --text: #ffffff; --muted: #e5e5e5; --primary: #ffff00; --accent: #00ffff;
-    --border: #ffffff;
-    --base-size: 20px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: var(--bg); color: var(--text);
-    font-size: var(--base-size); line-height: 1.55;
-  }
-  .container { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IV Международный фестиваль адаптивных видов спорта «Импульс» — International Inclusive Games 2027</title>
+  <meta name="description" content="Официальный двуязычный сайт IV Международного фестиваля адаптивных видов спорта «Импульс» (International Inclusive Games 2027). 11–15 июня 2027, Нижний Новгород: 4000+ спортсменов, 30+ видов спорта, 20+ стран.">
+  <link rel="alternate" hreflang="ru" href="https://festimpulse.com/ru/">
+  <link rel="alternate" hreflang="en" href="https://festimpulse.com/en/">
+  <link rel="icon" type="image/png" href="assets/International_Inclus.png">
 
-  header {
-    background: rgba(15, 23, 42, 0.92); border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 20; backdrop-filter: blur(12px);
-  }
-  .nav { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; padding: 14px 0; }
-  .logo { font-weight: 800; font-size: 1.2em; letter-spacing: -0.3px; }
-  .logo span { color: var(--primary); }
-  .nav-links { display: flex; gap: 18px; flex-wrap: wrap; font-size: 0.9em; font-weight: 600; color: var(--muted); }
-  .nav-links a { color: inherit; text-decoration: none; }
-  .nav-links a:hover { color: var(--text); }
-  .nav-actions { display: flex; gap: 8px; align-items: center; }
-  .ctrl-btn {
-    padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--card); color: var(--text); font-weight: 700; font-size: 0.8em; cursor: pointer;
-  }
-  .ctrl-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
+  <!-- Google Fonts: Unbounded + Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Unbounded:wght@600;700;800&display=swap" rel="stylesheet">
 
-  .hero {
-    padding: 64px 0 48px;
-    background: radial-gradient(circle at 80% 10%, rgba(14, 165, 233, 0.2), transparent 55%);
-  }
-  .pill {
-    display: inline-block; padding: 6px 14px; border-radius: 999px;
-    background: rgba(14, 165, 233, 0.15); border: 1px solid var(--primary);
-    color: var(--primary); font-weight: 700; font-size: 0.85em; margin-bottom: 16px;
-  }
-  h1 { font-size: 2.6em; line-height: 1.12; font-weight: 800; margin-bottom: 16px; }
-  .hero-desc { font-size: 1.1em; color: var(--muted); max-width: 720px; margin-bottom: 28px; }
+  <link rel="stylesheet" href="styles.css">
 
-  .countdown {
-    display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 28px;
+  <!-- Schema.org Microdata (SportsEvent) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    "name": "IV Международный фестиваль адаптивных видов спорта «Импульс» — International Inclusive Games 2027",
+    "startDate": "2027-06-11T10:00:00+03:00",
+    "endDate": "2027-06-15T21:00:00+03:00",
+    "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+    "eventStatus": "https://schema.org/EventScheduled",
+    "location": {
+      "@type": "Place",
+      "name": "Стадион «Совкомбанк Арена» и спортивные кластеры Нижнего Новгорода",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Нижний Новгород",
+        "addressCountry": "RU"
+      }
+    },
+    "organizer": {
+      "@type": "Organization",
+      "name": "Международный инклюзивный комитет (International Inclusive Committee)",
+      "email": "blago@inclusivecommittee.com",
+      "telephone": "+7 (495) 001-23-06"
+    }
   }
-  .cd-box {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
-    padding: 14px 20px; min-width: 100px; text-align: center;
-  }
-  .cd-num { font-size: 1.8em; font-weight: 800; color: var(--primary); }
-  .cd-lbl { font-size: 0.78em; color: var(--muted); text-transform: uppercase; }
-
-  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
-  .btn {
-    padding: 14px 24px; border-radius: 12px; font-weight: 700; font-size: 0.95em;
-    text-decoration: none; cursor: pointer; border: none;
-  }
-  .btn-primary { background: linear-gradient(90deg, #0ea5e9, #10b981); color: #fff; }
-  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 24px 0 48px; }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px; }
-  .stat-num { font-size: 2em; font-weight: 800; color: var(--accent); }
-  .stat-txt { color: var(--muted); font-size: 0.95em; }
-
-  .section { padding: 36px 0; border-top: 1px solid var(--border); }
-  .sec-title { font-size: 1.7em; font-weight: 800; margin-bottom: 18px; }
-  .cards-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
-  .card h3 { font-size: 1.1em; margin-bottom: 8px; }
-  .card p { font-size: 0.9em; color: var(--muted); }
-  footer { padding: 32px 0; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85em; text-align: center; }
-</style>
+  </script>
 </head>
 <body>
-<header>
-  <div class="container nav">
-    <div class="logo"><span>ИМПУЛЬС</span> 2027</div>
-    <nav class="nav-links" id="nav-links"></nav>
-    <div class="nav-actions">
-      <button class="ctrl-btn active" id="btn-ru" onclick="setLang('ru')">RU</button>
-      <button class="ctrl-btn" id="btn-en" onclick="setLang('en')">EN</button>
-      <button class="ctrl-btn" onclick="toggleA11y()" id="btn-a11y">Aa Слабовидящим</button>
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
+  <!-- Top Utility Bar -->
+  <div class="top-utility">
+    <div class="container top-utility-inner">
+      <div class="utility-contacts">
+        <a href="mailto:blago@inclusivecommittee.com">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <span>blago@inclusivecommittee.com</span>
+        </a>
+        <a href="tel:+74950012306">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span>+7 (495) 001-23-06</span>
+        </a>
+      </div>
+      <div class="utility-route">
+        <span>SEO URL:</span>
+        <span class="route-chip" id="route-indicator">/ru/home</span>
+      </div>
     </div>
   </div>
-</header>
 
-<section class="hero">
-  <div class="container">
-    <div class="pill" id="h-pill"></div>
-    <h1 id="h-title"></h1>
-    <p class="hero-desc" id="h-desc"></p>
+  <!-- Sticky Navigation Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="#" class="brand" aria-label="Impulse 2027 Home">
+        <span class="brand-logo-wrap">
+          <img src="assets/1736685920.png" alt="International Inclusive Committee">
+        </span>
+        <span class="brand-meta">
+          <span class="brand-name" id="brand-title">ИМПУЛЬС 2027</span>
+          <span class="brand-sub" id="brand-sub">International Inclusive Games</span>
+        </span>
+      </a>
 
-    <div class="countdown">
-      <div class="cd-box"><div class="cd-num" id="cd-d">--</div><div class="cd-lbl" id="l-d"></div></div>
-      <div class="cd-box"><div class="cd-num" id="cd-h">--</div><div class="cd-lbl" id="l-h"></div></div>
-      <div class="cd-box"><div class="cd-num" id="cd-m">--</div><div class="cd-lbl" id="l-m"></div></div>
+      <nav class="main-nav" id="main-nav" aria-label="Main Navigation"></nav>
+
+      <div class="header-controls">
+        <div class="lang-switch" role="group" aria-label="Language switcher">
+          <button type="button" class="lang-btn active" id="lang-ru">RU</button>
+          <button type="button" class="lang-btn" id="lang-en">EN</button>
+        </div>
+
+        <button type="button" class="a11y-btn" id="btn-a11y" title="Accessibility High Contrast">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span id="btn-a11y-label">Aa Слабовидящим</span>
+        </button>
+
+        <button type="button" class="cms-btn" id="btn-cms">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          <span id="btn-cms-label">CMS Редактор</span>
+        </button>
+
+        <button type="button" class="mobile-toggle" id="mobile-toggle" aria-label="Toggle Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO SECTION -->
+    <section class="hero" id="top">
+      <canvas id="torch-canvas" aria-hidden="true"></canvas>
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow-row">
+            <span class="badge-pill">
+              <span class="live-dot"></span>
+              <span id="hero-badge-txt"></span>
+            </span>
+            <span class="venue-chip" id="hero-venue"></span>
+          </div>
+
+          <h1 class="hero-title">
+            <span id="hero-title-top"></span><br>
+            <span class="grad-text" id="hero-title-grad"></span>
+          </h1>
+
+          <p class="hero-subtitle" id="hero-subtitle"></p>
+
+          <div class="cta-group">
+            <a href="https://forms.yandex.ru/u/6abe214849af472235b19167" target="_blank" rel="noopener" class="btn btn-primary magnetic-btn">
+              <span id="cta-ru-txt"></span>
+              <span aria-hidden="true">↗</span>
+            </a>
+            <a href="https://forms.yandex.ru/u/6ae0ccfa2c4f8976dc916c59" target="_blank" rel="noopener" class="btn btn-white magnetic-btn">
+              <span id="cta-int-txt"></span>
+              <span class="arrow-badge" aria-hidden="true">↗</span>
+            </a>
+          </div>
+
+          <div class="hero-checks" id="hero-checks"></div>
+        </div>
+
+        <div class="hero-visual-stack">
+          <div class="emblem-card">
+            <div class="emblem-overlay-tag">
+              <span class="tag-glass" id="emblem-tag-left"></span>
+              <span class="tag-glass" id="emblem-tag-right"></span>
+            </div>
+            <img src="assets/1793025447.png" alt="International Inclusive Games Torch Emblem">
+          </div>
+
+          <div class="countdown-dock" aria-label="Countdown to Opening Ceremony">
+            <div class="cd-grid">
+              <div class="cd-cell">
+                <div class="cd-val" id="cd-d">198</div>
+                <div class="cd-unit" id="cd-u-d">Дней</div>
+              </div>
+              <div class="cd-cell">
+                <div class="cd-val" id="cd-h">00</div>
+                <div class="cd-unit" id="cd-u-h">Часов</div>
+              </div>
+              <div class="cd-cell">
+                <div class="cd-val" id="cd-m">00</div>
+                <div class="cd-unit" id="cd-u-m">Мин</div>
+              </div>
+              <div class="cd-cell">
+                <div class="cd-val" id="cd-s">00</div>
+                <div class="cd-unit" id="cd-u-s">Сек</div>
+              </div>
+            </div>
+            <div class="cd-side-label" id="cd-side">ДО СТАРТА</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PARTICIPATING NATIONS MARQUEE -->
+    <div class="countries-marquee" aria-label="Participating Countries">
+      <div class="marquee-track" id="marquee-track"></div>
     </div>
 
-    <div class="cta-row">
-      <a class="btn btn-primary" href="#apply" id="cta-ru"></a>
-      <a class="btn btn-outline" href="#apply" id="cta-int"></a>
+    <!-- KEY NUMBERS BENTO -->
+    <section class="stats-strip">
+      <div class="container">
+        <div class="stats-bento" id="stats-bento"></div>
+      </div>
+    </section>
+
+    <!-- ABOUT & MISSION -->
+    <section class="section" id="about">
+      <div class="container about-grid">
+        <div class="about-text reveal-up">
+          <span class="sec-eyebrow" id="about-eyebrow"></span>
+          <h2 class="sec-title" id="about-title" style="margin-bottom:20px"></h2>
+          <p id="about-p1"></p>
+          <p id="about-p2"></p>
+          <blockquote class="mission-quote" id="about-quote"></blockquote>
+        </div>
+
+        <div class="about-media reveal-up">
+          <img class="about-poster" src="assets/1793097554.png" alt="IV International Festival Impulse 2027 Poster" loading="lazy">
+          <div style="margin-top:18px;font-weight:700;font-size:0.9rem;color:var(--cyan)" id="venues-title"></div>
+          <div class="venues-strip" id="venues-strip"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROGRAM: AMATEUR & PRO + SPORTS ROSTER -->
+    <section class="section section-alt" id="program">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="sec-eyebrow" id="prog-eyebrow"></span>
+            <h2 class="sec-title" id="prog-title"></h2>
+          </div>
+          <p class="sec-desc" id="prog-desc"></p>
+        </div>
+
+        <div class="division-switch-wrap" id="divisions-wrap"></div>
+
+        <div class="sports-catalog-box reveal-up">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+            <h3 style="font-family:var(--font-display);font-size:1.18rem" id="sports-catalog-title"></h3>
+            <span class="cms-status-pill" id="sports-cms-badge"></span>
+          </div>
+          <div class="sports-filter-bar">
+            <div class="filter-tabs" id="sports-filters"></div>
+          </div>
+          <div class="sports-chips-grid" id="sports-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHAT AWAITS IN 2027 -->
+    <section class="section" id="awaits">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="sec-eyebrow" id="awaits-eyebrow"></span>
+            <h2 class="sec-title" id="awaits-title"></h2>
+          </div>
+          <p class="sec-desc" id="awaits-desc"></p>
+        </div>
+        <div class="awaits-grid" id="awaits-grid"></div>
+      </div>
+    </section>
+
+    <!-- INTERNATIONAL EXHIBITION -->
+    <section class="section section-alt" id="expo">
+      <div class="container">
+        <div class="expo-banner reveal-up">
+          <div>
+            <span class="sec-eyebrow" id="expo-eyebrow" style="color:var(--cyan)"></span>
+            <h2 class="sec-title" id="expo-title" style="margin-bottom:16px"></h2>
+            <p style="color:#E2E8F0;margin-bottom:26px;font-size:1rem" id="expo-text"></p>
+            <a href="#apply" class="btn btn-primary">
+              <span id="expo-cta"></span>
+              <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+          <div class="expo-sectors" id="expo-sectors"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NEWS FEED -->
+    <section class="section" id="news">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="sec-eyebrow" id="news-eyebrow"></span>
+            <h2 class="sec-title" id="news-title"></h2>
+          </div>
+          <p class="sec-desc" id="news-desc"></p>
+        </div>
+        <div class="news-grid" id="news-grid"></div>
+      </div>
+    </section>
+
+    <!-- HISTORY 2024 - 2026 -->
+    <section class="section section-alt" id="history">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="sec-eyebrow" id="hist-eyebrow"></span>
+            <h2 class="sec-title" id="hist-title"></h2>
+          </div>
+          <p class="sec-desc" id="hist-desc"></p>
+        </div>
+        <div class="timeline-tabs" id="history-tabs"></div>
+        <div class="history-stage" id="history-stage"></div>
+      </div>
+    </section>
+
+    <!-- SUPPORT & PARTNERS -->
+    <section class="section" id="partners">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="sec-eyebrow" id="part-eyebrow"></span>
+            <h2 class="sec-title" id="part-title"></h2>
+          </div>
+          <p class="sec-desc" id="part-desc"></p>
+        </div>
+
+        <div class="title-sponsor-card reveal-up">
+          <div style="max-width:680px">
+            <span class="badge-pill" style="margin-bottom:10px">2027 • Exclusive Tier</span>
+            <h3 style="font-family:var(--font-display);font-size:1.35rem;margin-bottom:8px" id="sponsor-title"></h3>
+            <p style="color:#CBD5E1;font-size:0.95rem" id="sponsor-sub"></p>
+          </div>
+          <a href="#apply" class="btn btn-white">
+            <span id="sponsor-cta"></span>
+            <span class="arrow-badge" aria-hidden="true">↗</span>
+          </a>
+        </div>
+
+        <div class="partners-grid" id="partners-grid"></div>
+      </div>
+    </section>
+
+    <!-- DOCUMENTS & APPLICATION / FEEDBACK -->
+    <section class="section section-alt" id="documents">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="sec-eyebrow" id="docs-eyebrow"></span>
+            <h2 class="sec-title" id="docs-title"></h2>
+          </div>
+        </div>
+
+        <div class="docs-apply-grid" id="apply">
+          <div>
+            <div class="doc-list" id="doc-list"></div>
+
+            <div style="margin-top:24px;padding:24px;border-radius:20px;background:rgba(252,34,106,0.1);border:1px solid var(--border-accent)">
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <a href="https://forms.yandex.ru/u/6abe214849af472235b19167" target="_blank" rel="noopener" class="btn btn-primary">
+                  <span id="apply-cta-ru"></span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+                <a href="https://forms.yandex.ru/u/6ae0ccfa2c4f8976dc916c59" target="_blank" rel="noopener" class="btn btn-white">
+                  <span id="apply-cta-int"></span>
+                  <span class="arrow-badge" aria-hidden="true">↗</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="feedback-card">
+            <h3 style="font-family:var(--font-display);font-size:1.2rem;margin-bottom:8px" id="form-title"></h3>
+            <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:18px" id="form-sub"></p>
+
+            <form id="contact-form">
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="inp-name" id="lbl-name"></label>
+                  <input type="text" id="inp-name" required autocomplete="name">
+                </div>
+                <div class="form-field">
+                  <label for="inp-email" id="lbl-email"></label>
+                  <input type="email" id="inp-email" required autocomplete="email">
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label for="inp-role" id="lbl-role"></label>
+                <select id="inp-role"></select>
+              </div>
+
+              <div class="form-field">
+                <label for="inp-msg" id="lbl-msg"></label>
+                <textarea id="inp-msg" rows="3" required></textarea>
+              </div>
+
+              <div class="form-field">
+                <label for="inp-spam" id="lbl-spam"></label>
+                <input type="text" id="inp-spam" placeholder="5" required inputmode="numeric">
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width:100%" id="btn-submit"></button>
+              <div class="form-toast" id="form-toast" role="status" aria-live="polite"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <span class="brand-logo-wrap">
+              <img src="assets/1736685920.png" alt="International Inclusive Committee">
+            </span>
+            <strong style="font-family:var(--font-display);font-size:1rem">IMPULSE • 2027</strong>
+          </div>
+          <p style="color:var(--text-muted);font-size:0.9rem;max-width:440px" id="foot-mission"></p>
+        </div>
+
+        <div class="footer-col">
+          <h4 id="foot-nav-title"></h4>
+          <ul class="footer-links" id="foot-links"></ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 id="foot-contact-title"></h4>
+          <ul class="footer-links">
+            <li><a href="mailto:blago@inclusivecommittee.com">blago@inclusivecommittee.com</a></li>
+            <li><a href="mailto:pr@inclusivecommittee.com">pr@inclusivecommittee.com (Media)</a></li>
+            <li><a href="tel:+74950012306">+7 (495) 001-23-06</a></li>
+            <li style="color:var(--text-muted);font-size:0.9rem" id="foot-address"></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span id="foot-rights"></span>
+        <a href="#top" class="btn btn-glass" style="padding:8px 16px;font-size:0.8rem">↑ Top</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL (News & CMS Demo) -->
+  <div class="modal-backdrop" id="info-modal" role="dialog" aria-modal="true">
+    <div class="modal-window">
+      <button type="button" class="modal-close" id="modal-close" aria-label="Close">✕</button>
+      <div id="modal-body"></div>
     </div>
   </div>
-</section>
 
-<div class="container">
-  <div class="stats" id="stats-grid"></div>
-</div>
+  <!-- FLOATING PARTICIPANT CONCIERGE -->
+  <button type="button" class="concierge-fab" id="concierge-fab">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span id="concierge-fab-txt">Гид Игр 2027</span>
+  </button>
 
-<section class="section">
-  <div class="container">
-    <h2 class="sec-title" id="sec-prog"></h2>
-    <div class="cards-3" id="prog-cards"></div>
+  <div class="concierge-panel" id="concierge-panel">
+    <strong style="font-family:var(--font-display);font-size:0.95rem;display:block;margin-bottom:4px" id="concierge-title"></strong>
+    <span style="font-size:0.78rem;color:var(--text-muted);display:block" id="concierge-sub"></span>
+    <div class="concierge-chips" id="concierge-chips"></div>
+    <div class="concierge-answer" id="concierge-ans"></div>
   </div>
-</section>
 
-<footer>
-  <div class="container" id="foot-txt"></div>
-</footer>
-
-<script>
-const i18n = {
-  ru: {
-    nav: ["О фестивале", "Программа", "Новости", "Выставка", "История", "Партнёры", "Документы"],
-    a11y: "Aa Слабовидящим",
-    pill: "11–15 ИЮНЯ 2027 • НИЖНИЙ НОВГОРОД",
-    title: "IV Международный фестиваль адаптивных видов спорта «Импульс»",
-    desc: "Международный инклюзивный комитет объединяет спортсменов, делегации и партнёров из России и более 20 стран мира. Прототип разработан на базе ТЗ (WordPress + Polylang, /ru/ и /en/ без автоперевода).",
-    labels: ["дней", "часов", "минут"],
-    cta1: "Подать заявку (РФ и СНГ)",
-    cta2: "International Application",
-    stats: [
-      ["4 000+", "спортсменов со всего мира"],
-      ["20+", "стран-участниц"],
-      ["30+", "видов адаптивного спорта"],
-      ["2024–2027", "история и развитие фестиваля"]
-    ],
-    secProg: "Направления и категории",
-    prog: [
-      ["Категория «Профессионал»", "Официальные соревнования по 30+ дисциплинам адаптивного спорта с судейской коллегией."],
-      ["Категория «Любитель»", "Открытые старты, инклюзивные эстафеты и мастер-классы для всех желающих."],
-      ["Международная выставка", "Экспозиция спортивных технологий, реабилитации, экипировки и сервисов доступной среды."]
-    ],
-    foot: "Прототип официального сайта International Inclusive Games 2027 • Полноценные RU/EN версии + CMS + SEO (Schema.org SportsEvent)"
-  },
-  en: {
-    nav: ["About", "Program", "News", "Expo", "History", "Partners", "Documents"],
-    a11y: "Aa Accessibility",
-    pill: "JUNE 11–15, 2027 • NIZHNY NOVGOROD",
-    title: "IV International Inclusive Games «Impulse» 2027",
-    desc: "Organized by the International Inclusive Committee. Uniting athletes, delegations and partners from 20+ countries. Prototype built to match the technical specification (WordPress + Polylang, separate /ru/ & /en/ CMS content).",
-    labels: ["days", "hours", "minutes"],
-    cta1: "Apply (Russia & CIS)",
-    cta2: "International Application",
-    stats: [
-      ["4,000+", "athletes worldwide"],
-      ["20+", "participating countries"],
-      ["30+", "adaptive sports disciplines"],
-      ["2024–2027", "festival heritage & growth"]
-    ],
-    secProg: "Program & Categories",
-    prog: [
-      ["Professional Division", "Official competitions across 30+ adaptive sports with certified international referees."],
-      ["Amateur Division", "Open inclusive races, relay events and sports workshops for everyone."],
-      ["International Expo", "Exhibition of adaptive sports equipment, rehabilitation tech and accessible solutions."]
-    ],
-    foot: "Official Website Prototype · International Inclusive Games 2027 · Full RU/EN CMS + SEO (Schema.org SportsEvent)"
-  }
-};
-
-function setLang(l) {
-  const d = i18n[l];
-  document.getElementById('btn-ru').classList.toggle('active', l === 'ru');
-  document.getElementById('btn-en').classList.toggle('active', l === 'en');
-  document.getElementById('nav-links').innerHTML = d.nav.map(x => `<a href="#">${x}</a>`).join('');
-  document.getElementById('btn-a11y').textContent = d.a11y;
-  document.getElementById('h-pill').textContent = d.pill;
-  document.getElementById('h-title').textContent = d.title;
-  document.getElementById('h-desc').textContent = d.desc;
-  document.getElementById('l-d').textContent = d.labels[0];
-  document.getElementById('l-h').textContent = d.labels[1];
-  document.getElementById('l-m').textContent = d.labels[2];
-  document.getElementById('cta-ru').textContent = d.cta1;
-  document.getElementById('cta-int').textContent = d.cta2;
-  document.getElementById('stats-grid').innerHTML = d.stats.map(s => `<div class="stat-card"><div class="stat-num">${s[0]}</div><div class="stat-txt">${s[1]}</div></div>`).join('');
-  document.getElementById('sec-prog').textContent = d.secProg;
-  document.getElementById('prog-cards').innerHTML = d.prog.map(p => `<div class="card"><h3>${p[0]}</h3><p>${p[1]}</p></div>`).join('');
-  document.getElementById('foot-txt').textContent = d.foot;
-}
-
-function toggleA11y() {
-  document.body.classList.toggle('hc');
-}
-
-function updateTimer() {
-  const target = new Date('2027-06-11T10:00:00+03:00').getTime();
-  const diff = Math.max(0, target - Date.now());
-  document.getElementById('cd-d').textContent = Math.floor(diff / 86400000);
-  document.getElementById('cd-h').textContent = Math.floor((diff % 86400000) / 3600000);
-  document.getElementById('cd-m').textContent = Math.floor((diff % 3600000) / 60000);
-}
-
-setLang('ru');
-updateTimer();
-setInterval(updateTimer, 30000);
-</script>
+  <!-- GSAP + ScrollTrigger -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

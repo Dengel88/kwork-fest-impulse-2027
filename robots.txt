@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /ru/
+Allow: /en/
+Sitemap: https://festimpulse.com/sitemap.xml
