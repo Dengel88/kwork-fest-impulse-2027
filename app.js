@@ -2,26 +2,59 @@
   let currentLang = "ru";
   let currentSportFilter = "all";
   let currentHistoryYear = "2026";
+  let currentGalleryIdx = 0;
+  let lastFormStatus = null; // null | "success" | "error"
+  let lastModalTrigger = null;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function detectInitialRoute() {
+    const h = (window.location.hash || "").toLowerCase();
+    if (h.startsWith("#/en") || h === "#en") {
+      currentLang = "en";
+    } else if (h.startsWith("#/ru") || h === "#ru") {
+      currentLang = "ru";
+    }
+  }
+
+  function updateHashRoute(slug) {
+    const clean = slug ? `${currentLang}/${slug}` : currentLang;
+    try {
+      history.replaceState(null, "", `#/${clean}`);
+    } catch (_) {}
+  }
 
   function renderAll() {
     const d = SITE_DATA[currentLang];
     document.documentElement.lang = currentLang;
     if (d.pageTitle) document.title = d.pageTitle;
+    const metaDesc = document.getElementById("meta-desc");
+    if (metaDesc && d.metaDesc) metaDesc.setAttribute("content", d.metaDesc);
 
-    // Route & Header
-    document.getElementById("route-indicator").textContent = d.routePrefix + "home";
+    // Accessibility & Header Controls
+    document.getElementById("skip-link").textContent = d.skipLink;
+    document.getElementById("utility-org").textContent = d.utilityOrg;
     document.getElementById("brand-title").textContent = d.brandTitle;
     document.getElementById("brand-sub").textContent = d.brandSub;
     document.getElementById("btn-a11y-label").textContent = d.a11yBtn;
+    document.getElementById("btn-a11y").setAttribute("aria-label", d.a11yAria);
     document.getElementById("btn-cms-label").textContent = d.cmsBtn;
-    document.getElementById("lang-ru").classList.toggle("active", currentLang === "ru");
-    document.getElementById("lang-en").classList.toggle("active", currentLang === "en");
+    document.getElementById("btn-cms").setAttribute("aria-label", d.cmsAria);
+    document.getElementById("mobile-toggle").setAttribute("aria-label", d.menuAria);
+    document.getElementById("modal-close").setAttribute("aria-label", d.modalCloseLabel);
+    document.getElementById("concierge-close").setAttribute("aria-label", d.conciergeCloseLabel);
+    document.getElementById("foot-top-btn").textContent = d.footTopBtn;
 
-    const navHtml = d.nav
+    const isRu = currentLang === "ru";
+    const btnRu = document.getElementById("lang-ru");
+    const btnEn = document.getElementById("lang-en");
+    btnRu.classList.toggle("active", isRu);
+    btnRu.setAttribute("aria-pressed", String(isRu));
+    btnEn.classList.toggle("active", !isRu);
+    btnEn.setAttribute("aria-pressed", String(!isRu));
+
+    document.getElementById("main-nav").innerHTML = d.nav
       .map((item) => `<a href="#${item.id}" data-slug="${item.slug}">${item.label}</a>`)
       .join("");
-    document.getElementById("main-nav").innerHTML = navHtml;
 
     // Hero
     document.getElementById("hero-badge-txt").textContent = d.hero.badge;
@@ -52,9 +85,9 @@
     document.getElementById("cd-u-s").textContent = d.hero.cdUnits[3];
     document.getElementById("cd-side").textContent = d.hero.cdSide;
 
-    // Marquee (duplicated for seamless loop)
+    // Marquee
     const mItems = [...d.marquee, ...d.marquee]
-      .map((c) => `<span class="marquee-item"><span class="marquee-sep"></span>${c}</span>`)
+      .map((c) => `<span class="marquee-item"><span class="marquee-sep" aria-hidden="true"></span>${c}</span>`)
       .join("");
     document.getElementById("marquee-track").innerHTML = mItems;
 
@@ -63,21 +96,24 @@
       .map(
         (s) => `
       <div class="stat-box reveal-up">
-        <div class="stat-number"><span class="count-num" data-target="${s.num}">${s.num}</span>${s.suffix}</div>
+        <div class="stat-number"><span class="count-num" data-target="${s.num}">${s.num.toLocaleString(isRu ? "ru-RU" : "en-US")}</span>${s.suffix}</div>
         <div class="stat-caption">${s.label}</div>
       </div>`
       )
       .join("");
 
-    // About & Mission
+    // About & Mission (with language-matched poster!)
     document.getElementById("about-eyebrow").textContent = d.about.eyebrow;
     document.getElementById("about-title").textContent = d.about.title;
     document.getElementById("about-p1").textContent = d.about.p1;
     document.getElementById("about-p2").textContent = d.about.p2;
     document.getElementById("about-quote").textContent = d.about.quote;
+    const posterImg = document.getElementById("about-poster-img");
+    posterImg.src = d.about.poster;
+    posterImg.alt = d.about.posterAlt;
     document.getElementById("venues-title").textContent = d.about.venuesTitle;
     document.getElementById("venues-strip").innerHTML = d.about.venues
-      .map((v) => `<div class="venue-card"><span class="venue-dot"></span><span>${v}</span></div>`)
+      .map((v) => `<div class="venue-card"><span class="venue-dot" aria-hidden="true"></span><span>${v}</span></div>`)
       .join("");
 
     // Program & Divisions
@@ -95,7 +131,7 @@
           ${div.bullets
             .map(
               (b) => `<li>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--cyan);flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--cyan);flex-shrink:0" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
             <span>${b}</span>
           </li>`
             )
@@ -135,7 +171,7 @@
       .map(
         (s) => `
       <div class="expo-sector-item">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2.4" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2.4" style="flex-shrink:0;margin-top:2px" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>
         <span>${s}</span>
       </div>`
       )
@@ -171,10 +207,11 @@
     document.getElementById("hist-desc").textContent = d.history.desc;
     renderHistory();
 
-    // Partners
+    // Partners (eager load logos so white cards never appear empty!)
     document.getElementById("part-eyebrow").textContent = d.partners.eyebrow;
     document.getElementById("part-title").textContent = d.partners.title;
     document.getElementById("part-desc").textContent = d.partners.desc;
+    document.getElementById("sponsor-tier-badge").textContent = d.partners.tierBadge;
     document.getElementById("sponsor-title").textContent = d.partners.sponsorTitle;
     document.getElementById("sponsor-sub").textContent = d.partners.sponsorSub;
     document.getElementById("sponsor-cta").textContent = d.partners.sponsorCta;
@@ -183,7 +220,7 @@
         (p) => `
       <div class="partner-tile reveal-up">
         <div class="partner-logo-box">
-          <img src="${p.img}" alt="${p.name}" loading="lazy">
+          <img src="${p.img}" alt="${p.name}">
         </div>
         <div>
           <div class="partner-role">${p.role}</div>
@@ -221,11 +258,19 @@
     document.getElementById("lbl-spam").textContent = d.docs.fSpam;
     document.getElementById("btn-submit").textContent = d.docs.fSubmit;
 
+    // Keep form toast translated if already visible!
+    const toast = document.getElementById("form-toast");
+    if (lastFormStatus === "success") {
+      toast.textContent = d.docs.fSuccess;
+    } else if (lastFormStatus === "error") {
+      toast.textContent = d.docs.fError;
+    }
+
     // Footer
     document.getElementById("foot-mission").textContent = d.footer.mission;
     document.getElementById("foot-nav-title").textContent = d.footer.navTitle;
     document.getElementById("foot-links").innerHTML = d.nav
-      .map((item) => `<li><a href="#${item.id}">${item.label}</a></li>`)
+      .map((item) => `<li><a href="#${item.id}" data-slug="${item.slug}">${item.label}</a></li>`)
       .join("");
     document.getElementById("foot-contact-title").textContent = d.footer.contactTitle;
     document.getElementById("foot-address").textContent = d.footer.address;
@@ -249,7 +294,7 @@
     document.getElementById("sports-filters").innerHTML = d.program.filters
       .map(
         (f) =>
-          `<button type="button" class="filter-tab ${currentSportFilter === f.key ? "active" : ""}" data-sfilter="${f.key}">${f.label}</button>`
+          `<button type="button" role="tab" aria-selected="${currentSportFilter === f.key}" class="filter-tab ${currentSportFilter === f.key ? "active" : ""}" data-sfilter="${f.key}">${f.label}</button>`
       )
       .join("");
 
@@ -270,11 +315,11 @@
       btn.addEventListener("click", () => {
         currentSportFilter = btn.getAttribute("data-sfilter");
         renderSports();
-        if (window.gsap && !reducedMotion) {
+        if (window.gsap && !reducedMotion && !document.body.classList.contains("a11y-mode")) {
           gsap.fromTo(
             "#sports-grid .sport-chip",
             { opacity: 0, y: 12, scale: 0.96 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.35, stagger: 0.03, ease: "power2.out" }
+            { opacity: 1, y: 0, scale: 1, duration: 0.32, stagger: 0.025, ease: "power2.out" }
           );
         }
       });
@@ -287,45 +332,135 @@
     document.getElementById("history-tabs").innerHTML = years
       .map(
         (y) =>
-          `<button type="button" class="year-tab ${currentHistoryYear === y ? "active" : ""}" data-hyear="${y}">${y}</button>`
+          `<button type="button" role="tab" aria-selected="${currentHistoryYear === y}" class="year-tab ${currentHistoryYear === y ? "active" : ""}" data-hyear="${y}">${y}</button>`
       )
       .join("");
 
     const hy = d.history.years[currentHistoryYear];
+    if (currentGalleryIdx >= hy.gallery.length) currentGalleryIdx = 0;
+    const activePhoto = hy.gallery[currentGalleryIdx];
+
     document.getElementById("history-stage").innerHTML = `
       <div>
         <span class="badge-pill" style="margin-bottom:14px">${hy.badge}</span>
-        <h3 style="font-family:var(--font-display);font-size:1.5rem;margin-bottom:14px">${hy.title}</h3>
-        <p style="color:#CBD5E1;font-size:0.98rem">${hy.text}</p>
+        <h3 class="history-title">${hy.title}</h3>
+        <p class="history-text">${hy.text}</p>
         <div class="history-kpis">
           ${hy.kpis.map((k) => `<div class="hkpi"><strong>${k.v}</strong><span>${k.l}</span></div>`).join("")}
         </div>
       </div>
-      <div>
-        <img class="history-img" src="${hy.img}" alt="${hy.title}" loading="lazy">
+      <div class="hist-gallery">
+        <button type="button" class="hist-main-btn" id="hist-lightbox-btn" aria-label="${activePhoto.cap}">
+          <img id="hist-main-img" src="${activePhoto.src}" alt="${activePhoto.cap}" loading="lazy">
+          <span class="hist-zoom-pill">⤢ Zoom</span>
+        </button>
+        <div class="hist-caption" id="hist-caption">${activePhoto.cap}</div>
+        <div class="hist-thumbs">
+          ${hy.gallery
+            .map(
+              (g, idx) => `
+            <button type="button" class="hist-thumb-btn ${idx === currentGalleryIdx ? "active" : ""}" data-gidx="${idx}" aria-label="${g.cap}">
+              <img src="${g.src}" alt="" loading="lazy">
+            </button>`
+            )
+            .join("")}
+        </div>
       </div>
     `;
 
     document.querySelectorAll("[data-hyear]").forEach((btn) => {
       btn.addEventListener("click", () => {
         currentHistoryYear = btn.getAttribute("data-hyear");
+        currentGalleryIdx = 0;
         renderHistory();
-        if (window.gsap && !reducedMotion) {
-          gsap.fromTo("#history-stage", { opacity: 0.3, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" });
+        updateHashRoute(`history/${currentHistoryYear}`);
+        if (window.gsap && !reducedMotion && !document.body.classList.contains("a11y-mode")) {
+          gsap.fromTo("#history-stage", { opacity: 0.35, y: 12 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" });
         }
       });
     });
+
+    document.querySelectorAll("[data-gidx]").forEach((tbtn) => {
+      tbtn.addEventListener("click", () => {
+        currentGalleryIdx = Number(tbtn.getAttribute("data-gidx"));
+        const p = hy.gallery[currentGalleryIdx];
+        const mainImg = document.getElementById("hist-main-img");
+        const capEl = document.getElementById("hist-caption");
+        document.querySelectorAll(".hist-thumb-btn").forEach((b, i) => b.classList.toggle("active", i === currentGalleryIdx));
+        mainImg.src = p.src;
+        mainImg.alt = p.cap;
+        capEl.textContent = p.cap;
+        if (window.gsap && !reducedMotion && !document.body.classList.contains("a11y-mode")) {
+          gsap.fromTo(mainImg, { opacity: 0.4, scale: 0.985 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power2.out" });
+        }
+      });
+    });
+
+    const lbBtn = document.getElementById("hist-lightbox-btn");
+    if (lbBtn) {
+      lbBtn.addEventListener("click", () => {
+        const p = hy.gallery[currentGalleryIdx];
+        openModal(
+          `
+          <span class="badge-pill" style="margin-bottom:14px">${hy.badge}</span>
+          <h3 id="modal-title-ref" style="font-family:var(--font-display);font-size:1.25rem;margin-bottom:14px">${hy.title}</h3>
+          <img src="${p.src}" alt="${p.cap}" style="width:100%;max-height:62vh;object-fit:contain;background:#050311;border-radius:16px;margin-bottom:14px;border:1px solid var(--border-glass)">
+          <p style="color:#E2E8F0;font-size:0.95rem">${p.cap}</p>
+          `,
+          lbBtn
+        );
+      });
+    }
+  }
+
+  function openModal(html, triggerEl) {
+    lastModalTrigger = triggerEl || document.activeElement;
+    const modal = document.getElementById("info-modal");
+    document.getElementById("modal-body").innerHTML = html;
+    modal.hidden = false;
+    document.getElementById("modal-close").focus();
+  }
+
+  function closeModal() {
+    const modal = document.getElementById("info-modal");
+    if (!modal.hidden) {
+      modal.hidden = true;
+      if (lastModalTrigger && typeof lastModalTrigger.focus === "function") {
+        lastModalTrigger.focus();
+      }
+    }
+  }
+
+  function toggleConcierge(forceState) {
+    const panel = document.getElementById("concierge-panel");
+    const fab = document.getElementById("concierge-fab");
+    const willOpen = typeof forceState === "boolean" ? forceState : panel.hidden;
+    panel.hidden = !willOpen;
+    fab.setAttribute("aria-expanded", String(willOpen));
+  }
+
+  function closeMobileNav() {
+    const nav = document.getElementById("main-nav");
+    const toggle = document.getElementById("mobile-toggle");
+    nav.classList.remove("mobile-open");
+    toggle.setAttribute("aria-expanded", "false");
   }
 
   function bindDynamicEvents() {
     const d = SITE_DATA[currentLang];
 
-    // Nav route preview
-    document.querySelectorAll("#main-nav a").forEach((link) => {
-      link.addEventListener("click", () => {
-        const slug = link.getAttribute("data-slug");
-        document.getElementById("route-indicator").textContent = d.routePrefix + slug;
-        document.getElementById("main-nav").classList.remove("mobile-open");
+    // Smooth section links + hash route preview
+    document.querySelectorAll("#main-nav a, #foot-links a").forEach((link) => {
+      link.addEventListener("click", (e) => {
+        const targetId = link.getAttribute("href").replace("#", "");
+        const slug = link.getAttribute("data-slug") || targetId;
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          e.preventDefault();
+          closeMobileNav();
+          targetEl.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth" });
+          updateHashRoute(slug);
+        }
       });
     });
 
@@ -335,14 +470,16 @@
         const id = Number(btn.getAttribute("data-news-id"));
         const item = d.news.items.find((x) => x.id === id);
         if (!item) return;
-        document.getElementById("route-indicator").textContent = `${d.routePrefix}news/${item.id}`;
-        document.getElementById("modal-body").innerHTML = `
+        updateHashRoute(`news/${item.id}`);
+        openModal(
+          `
           <span class="badge-pill" style="margin-bottom:14px">${item.date}</span>
-          <h3 style="font-family:var(--font-display);font-size:1.45rem;margin-bottom:16px">${item.title}</h3>
+          <h3 id="modal-title-ref" style="font-family:var(--font-display);font-size:1.4rem;margin-bottom:16px">${item.title}</h3>
           <img src="${item.img}" alt="${item.title}" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;margin-bottom:18px;border:1px solid var(--border-glass)">
           <p style="color:#E2E8F0;line-height:1.75;font-size:1rem">${item.full}</p>
-        `;
-        document.getElementById("info-modal").classList.add("open");
+          `,
+          btn
+        );
       });
     });
 
@@ -353,7 +490,7 @@
         const ans = d.concierge.qna[idx]?.a || "";
         const box = document.getElementById("concierge-ans");
         box.textContent = ans;
-        if (window.gsap && !reducedMotion) {
+        if (window.gsap && !reducedMotion && !document.body.classList.contains("a11y-mode")) {
           gsap.fromTo(box, { opacity: 0.35, y: 6 }, { opacity: 1, y: 0, duration: 0.25 });
         }
       });
@@ -391,37 +528,39 @@
     window.addEventListener("resize", resize);
     resize();
 
-    for (let i = 0; i < 46; i++) {
+    for (let i = 0; i < 42; i++) {
       particles.push({
         x: Math.random() * (w || 1200),
         y: Math.random() * (h || 800),
-        r: Math.random() * 2.6 + 1,
-        vx: (Math.random() - 0.5) * 0.45,
-        vy: -Math.random() * 0.7 - 0.2,
+        r: Math.random() * 2.5 + 1,
+        vx: (Math.random() - 0.5) * 0.42,
+        vy: -Math.random() * 0.65 - 0.2,
         c: colors[i % colors.length],
-        a: Math.random() * 0.55 + 0.2
+        a: Math.random() * 0.5 + 0.2
       });
     }
 
     function draw() {
-      ctx.clearRect(0, 0, w, h);
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.y < -10) {
-          p.y = h + 10;
-          p.x = Math.random() * w;
-        }
-        if (p.x < -10) p.x = w + 10;
-        if (p.x > w + 10) p.x = -10;
+      if (!document.body.classList.contains("a11y-mode")) {
+        ctx.clearRect(0, 0, w, h);
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.y < -10) {
+            p.y = h + 10;
+            p.x = Math.random() * w;
+          }
+          if (p.x < -10) p.x = w + 10;
+          if (p.x > w + 10) p.x = -10;
 
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = p.c;
-        ctx.globalAlpha = p.a;
-        ctx.fill();
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = p.c;
+          ctx.globalAlpha = p.a;
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
       }
-      ctx.globalAlpha = 1;
       requestAnimationFrame(draw);
     }
     draw();
@@ -433,31 +572,30 @@
     gsap.registerPlugin(ScrollTrigger);
 
     const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-    tl.from(".eyebrow-row", { opacity: 0, y: 18, duration: 0.6 })
-      .from(".hero-title", { opacity: 0, y: 28, duration: 0.75 }, "-=0.4")
-      .from(".hero-subtitle", { opacity: 0, y: 20, duration: 0.6 }, "-=0.45")
-      .from(".cta-group .btn", { opacity: 0, y: 16, stagger: 0.1, duration: 0.5 }, "-=0.35")
-      .from(".hero-checks", { opacity: 0, y: 12, duration: 0.5 }, "-=0.3")
-      .from(".emblem-card", { opacity: 0, scale: 0.92, y: 24, duration: 0.8 }, "-=0.65")
-      .from(".countdown-dock", { opacity: 0, y: 22, duration: 0.65 }, "-=0.5");
+    tl.from(".eyebrow-row", { opacity: 0, y: 18, duration: 0.55 })
+      .from(".hero-title", { opacity: 0, y: 26, duration: 0.7 }, "-=0.38")
+      .from(".hero-subtitle", { opacity: 0, y: 18, duration: 0.55 }, "-=0.42")
+      .from(".cta-group .btn", { opacity: 0, y: 14, stagger: 0.1, duration: 0.48 }, "-=0.32")
+      .from(".hero-checks", { opacity: 0, y: 12, duration: 0.45 }, "-=0.28")
+      .from(".emblem-stage", { opacity: 0, scale: 0.93, y: 22, duration: 0.75 }, "-=0.6")
+      .from(".countdown-dock", { opacity: 0, y: 20, duration: 0.6 }, "-=0.45");
 
-    // Subtle floating motion on emblem
     gsap.to(".emblem-card", {
-      y: -8,
+      y: -7,
       duration: 3.2,
       repeat: -1,
       yoyo: true,
       ease: "sine.inOut"
     });
 
-    // Magnetic primary CTAs
     document.querySelectorAll(".magnetic-btn").forEach((el) => {
       const xTo = gsap.quickTo(el, "x", { duration: 0.35, ease: "power3.out" });
       const yTo = gsap.quickTo(el, "y", { duration: 0.35, ease: "power3.out" });
       el.addEventListener("pointermove", (e) => {
+        if (window.innerWidth < 768 || document.body.classList.contains("a11y-mode")) return;
         const r = el.getBoundingClientRect();
-        xTo((e.clientX - r.left - r.width / 2) * 0.22);
-        yTo((e.clientY - r.top - r.height / 2) * 0.22);
+        xTo((e.clientX - r.left - r.width / 2) * 0.2);
+        yTo((e.clientY - r.top - r.height / 2) * 0.2);
       });
       el.addEventListener("pointerleave", () => {
         xTo(0);
@@ -467,21 +605,21 @@
   }
 
   function runScrollAnimations() {
-    if (!window.gsap || !window.ScrollTrigger || reducedMotion) return;
+    if (!window.gsap || !window.ScrollTrigger || reducedMotion || document.body.classList.contains("a11y-mode")) return;
     ScrollTrigger.getAll().forEach((t) => t.kill());
 
     gsap.utils.toArray(".reveal-up").forEach((el) => {
       gsap.fromTo(
         el,
-        { opacity: 0, y: 26 },
+        { opacity: 0, y: 24 },
         {
           opacity: 1,
           y: 0,
-          duration: 0.55,
+          duration: 0.5,
           ease: "power2.out",
           scrollTrigger: {
             trigger: el,
-            start: "top 88%",
+            start: "top 89%",
             toggleActions: "play none none none"
           }
         }
@@ -493,11 +631,11 @@
       const obj = { val: 0 };
       gsap.to(obj, {
         val: target,
-        duration: 1.4,
+        duration: 1.3,
         ease: "power2.out",
         scrollTrigger: {
           trigger: counter,
-          start: "top 90%",
+          start: "top 92%",
           once: true
         },
         onUpdate: () => {
@@ -508,47 +646,75 @@
     });
   }
 
-  // Static Event Listeners
+  function syncMobileConciergeVisibility() {
+    const fab = document.getElementById("concierge-fab");
+    const panel = document.getElementById("concierge-panel");
+    if (window.innerWidth <= 680) {
+      const nearTop = window.scrollY < 260;
+      const menuOpen = document.getElementById("main-nav").classList.contains("mobile-open");
+      if ((nearTop || menuOpen) && panel.hidden) {
+        fab.classList.add("mobile-hidden-top");
+      } else {
+        fab.classList.remove("mobile-hidden-top");
+      }
+    } else {
+      fab.classList.remove("mobile-hidden-top");
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
+    detectInitialRoute();
     renderAll();
+    updateHashRoute("");
     tickCountdown();
     setInterval(tickCountdown, 1000);
     initTorchCanvas();
     initHeroEntrance();
+    syncMobileConciergeVisibility();
 
-    // Scroll progress bar
+    // Scroll progress bar & mobile FAB clearance
     window.addEventListener("scroll", () => {
       const h = document.documentElement;
       const pct = (h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight)) * 100;
       document.getElementById("scroll-progress").style.width = pct + "%";
-    });
+      syncMobileConciergeVisibility();
+    }, { passive: true });
+
+    window.addEventListener("resize", syncMobileConciergeVisibility);
 
     // Language switch
     document.getElementById("lang-ru").addEventListener("click", () => {
       if (currentLang !== "ru") {
         currentLang = "ru";
         renderAll();
+        updateHashRoute("");
       }
     });
     document.getElementById("lang-en").addEventListener("click", () => {
       if (currentLang !== "en") {
         currentLang = "en";
         renderAll();
+        updateHashRoute("");
       }
     });
 
-    // A11y toggle
-    document.getElementById("btn-a11y").addEventListener("click", () => {
-      document.body.classList.toggle("a11y-mode");
+    // High-contrast A11y toggle
+    const a11yBtn = document.getElementById("btn-a11y");
+    a11yBtn.addEventListener("click", () => {
+      const active = document.body.classList.toggle("a11y-mode");
+      a11yBtn.classList.toggle("active", active);
+      a11yBtn.setAttribute("aria-pressed", String(active));
     });
 
-    // CMS Preview modal
-    document.getElementById("btn-cms").addEventListener("click", () => {
+    // CMS / SEO Architecture Preview modal
+    const cmsBtn = document.getElementById("btn-cms");
+    cmsBtn.addEventListener("click", () => {
       const cm = SITE_DATA[currentLang].cmsModal;
-      document.getElementById("modal-body").innerHTML = `
+      openModal(
+        `
         <span class="badge-pill" style="margin-bottom:14px">Tilda / WordPress + Polylang</span>
-        <h3 style="font-family:var(--font-display);font-size:1.4rem;margin-bottom:12px">${cm.title}</h3>
-        <p style="color:#CBD5E1;margin-bottom:18px">${cm.lead}</p>
+        <h3 id="modal-title-ref" style="font-family:var(--font-display);font-size:1.35rem;margin-bottom:12px">${cm.title}</h3>
+        <p style="color:#DCE5F2;margin-bottom:18px">${cm.lead}</p>
         <div style="display:grid;gap:12px">
           ${cm.points
             .map(
@@ -556,28 +722,40 @@
             )
             .join("")}
         </div>
-      `;
-      document.getElementById("info-modal").classList.add("open");
+        `,
+        cmsBtn
+      );
     });
 
-    // Modal close
-    document.getElementById("modal-close").addEventListener("click", () => {
-      document.getElementById("info-modal").classList.remove("open");
-    });
+    // Modal close events
+    document.getElementById("modal-close").addEventListener("click", closeModal);
     document.getElementById("info-modal").addEventListener("click", (e) => {
-      if (e.target.id === "info-modal") {
-        document.getElementById("info-modal").classList.remove("open");
-      }
+      if (e.target.id === "info-modal") closeModal();
     });
 
-    // Mobile menu
-    document.getElementById("mobile-toggle").addEventListener("click", () => {
-      document.getElementById("main-nav").classList.toggle("mobile-open");
+    // Mobile menu toggle
+    const mobToggle = document.getElementById("mobile-toggle");
+    mobToggle.addEventListener("click", () => {
+      const nav = document.getElementById("main-nav");
+      const open = nav.classList.toggle("mobile-open");
+      mobToggle.setAttribute("aria-expanded", String(open));
+      syncMobileConciergeVisibility();
     });
 
     // Concierge drawer
-    document.getElementById("concierge-fab").addEventListener("click", () => {
-      document.getElementById("concierge-panel").classList.toggle("open");
+    document.getElementById("concierge-fab").addEventListener("click", () => toggleConcierge());
+    document.getElementById("concierge-close").addEventListener("click", () => {
+      toggleConcierge(false);
+      document.getElementById("concierge-fab").focus();
+    });
+
+    // Global Escape key handler for Accessibility!
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeModal();
+        toggleConcierge(false);
+        closeMobileNav();
+      }
     });
 
     // Feedback Form submit
@@ -588,14 +766,16 @@
       const toast = document.getElementById("form-toast");
       toast.style.display = "block";
       if (spamVal === "5") {
-        toast.style.background = "rgba(16, 185, 129, 0.16)";
-        toast.style.borderColor = "rgba(16, 185, 129, 0.45)";
+        lastFormStatus = "success";
+        toast.style.background = "rgba(16, 185, 129, 0.18)";
+        toast.style.borderColor = "rgba(16, 185, 129, 0.55)";
         toast.style.color = "#6EE7B7";
         toast.textContent = d.fSuccess;
         e.target.reset();
       } else {
-        toast.style.background = "rgba(252, 34, 106, 0.16)";
-        toast.style.borderColor = "rgba(252, 34, 106, 0.5)";
+        lastFormStatus = "error";
+        toast.style.background = "rgba(252, 34, 106, 0.18)";
+        toast.style.borderColor = "rgba(252, 34, 106, 0.55)";
         toast.style.color = "#fda4af";
         toast.textContent = d.fError;
       }
